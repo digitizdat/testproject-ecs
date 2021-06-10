@@ -20,7 +20,7 @@ depends:  ## Install dependencies
 
 docker:  ## Build the Docker image
 	@echo "\n~~~ $(BOLD)$(CYAN)Building Docker image$(NORMAL) ~~~"
-	docker build --no-cache -t helloapp:v1 -f dockerfiles/Dockerfile context
+	docker build --no-cache -t fargate-app-repo -f dockerfiles/Dockerfile context
 
 clean:
 	@echo "\n~~~ $(BOLD)$(CYAN)Cleaning up$(NORMAL) ~~~"

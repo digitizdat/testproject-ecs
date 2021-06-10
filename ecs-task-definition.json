@@ -1,0 +1,32 @@
+{
+  "executionRoleArn": "arn:aws:iam::810010952252:role/ecsTaskExecutionRole",
+  "containerDefinitions": [
+    {
+      "name": "meflargate",
+      "image": "810010952252.dkr.ecr.us-east-2.amazonaws.com/fargate-app-repo",
+      "essential": true,
+      "portMappings": [
+        {
+          "hostPort": 80,
+          "protocol": "tcp",
+          "containerPort": 80
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/BlackStinkbug",
+          "awslogs-region": "us-east-2",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ],
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "networkMode": "awsvpc",
+  "cpu": "256",
+  "memory": "512",
+  "family": "BlackStinkbug"
+}
