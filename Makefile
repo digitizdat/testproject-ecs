@@ -1,6 +1,25 @@
+# This code requires a few keys to be set in the environment
+ifeq ($(AWS_DEFAULT_REGION),)
+$(error "You must set the AWS_DEFAULT_REGION variable")
+endif
+ifeq ($(AWS_ACCESS_KEY_ID),)
+$(error "You must set the AWS_ACCESS_KEY_ID variable")
+endif
+ifeq ($(AWS_SECRET_ACCESS_KEY),)
+$(error "You must set the AWS_SECRET_ACCESS_KEY variable")
+endif
+ifeq ($(AWS_ACCOUNT_NUMBER),)
+$(error "You must set the AWS_ACCOUNT_NUMBER variable")
+endif
+
+
+AWS_ECR_REPONAME=fargate-app-repo
+AWS_ECR_HOSTNAME=$(AWS_ACCOUNT_NUMBER).dkr.ecr.$(AWS_DEFAULT_REGION).amazonaws.com
 
 # Syntax highlighting. MacOS ships with an old version of Bash that doesn't
 # support the \e escape so we need to use this other escape sequence.
+#
+#
 ifeq ("$(strip $(shell uname))","Darwin")
 ESC=\x1B
 else
@@ -18,9 +37,14 @@ lint:  ## Run the linter(s)
 depends:  ## Install dependencies
 	pip install -r requirements.txt
 
-docker:  ## Build the Docker image
-	@echo "\n~~~ $(BOLD)$(CYAN)Building Docker image$(NORMAL) ~~~"
-	docker build --no-cache -t fargate-app-repo -f dockerfiles/Dockerfile context
+ecrauth:  ## Login to the ECR repo
+	aws ecr get-login-password --region $(AWS_DEFAULT_REGION) | docker login --username AWS --password-stdin $(AWS_ECR_HOSTNAME)
+
+docker:  ## Create the Docker image
+	@echo "\n~~~ $(BOLD)$(CYAN)Creating the Docker image$(NORMAL) ~~~"
+	docker build -t $(AWS_ECR_REPONAME) -f dockerfiles/Dockerfile context
+	docker tag $(AWS_ECR_REPONAME):latest $(AWS_ECR_HOSTNAME)/$(AWS_ECR_REPONAME):latest
+	docker push $(AWS_ECR_HOSTNAME)/$(AWS_ECR_REPONAME):latest
 
 clean:
 	@echo "\n~~~ $(BOLD)$(CYAN)Cleaning up$(NORMAL) ~~~"
